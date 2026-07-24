@@ -45,6 +45,10 @@ return [
         // Optional: test the policy without enforcing it — sends
         // Content-Security-Policy-Report-Only instead.
         'reportOnly' => true,
+
+        // Required when Kirby's pages cache is enabled — see
+        // "Pages cache" below.
+        'cacheSafe' => true,
     ],
 ];
 ```
@@ -122,6 +126,23 @@ grep -rn "<script" site/templates site/snippets | grep -v "cspNonce()"
 # Third-party origins referenced anywhere in the frontend
 grep -rhoE 'https://[a-z0-9.-]+' site/templates site/snippets assets | sort -u
 ```
+
+### Pages cache
+
+Kirby's pages cache (file, Redis, Memcached, … — the driver doesn't matter) stores the rendered HTML, including any nonces baked into it. The CSP header is regenerated with a fresh nonce on every request, so on a cache hit the header and HTML nonces no longer match — and since `'strict-dynamic'` makes modern browsers ignore `'self'`, **every script on a cached page would be blocked**.
+
+Enable `cacheSafe` to fix this:
+
+```php
+'akibeo.csp' => [
+    'enabled' => true,
+    'cacheSafe' => true,
+],
+```
+
+With `cacheSafe` the HTML is cached with a stable placeholder instead of a real nonce (via `page.render:after`, whose output is what the pages cache stores), and the placeholder is swapped for the current request's nonce on every response — cache hits included — through an output buffer. Templates keep calling `cspNonce()` as usual; nothing else changes.
+
+It's off by default because sites without a pages cache don't need the extra output buffering. Requires Kirby 4+ (the `page.render:after` hook).
 
 ### Testing a policy
 

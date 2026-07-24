@@ -153,14 +153,14 @@ When the console stays clean across the site, flip `reportOnly` to `false` (or r
 | Inline script blocked, console shows "Refused to execute inline script" | Add `nonce="{{ cspNonce() }}"` to that tag |
 | Third-party script/frame/font blocked | Add its origin to the matching directive in config |
 | GTM/GA tags not firing | Ensure the GTM loader snippet itself is nonced; `'strict-dynamic'` then allows what it loads |
-| Nonce in HTML differs from header | Something echoes output before the hook, or a full-page cache serves stale HTML — exclude cached pages or disable page cache for nonced pages |
+| Nonce in HTML differs from header | Something echoes output before the hook, or Kirby's pages cache serves stale HTML — set `'cacheSafe' => true` |
 | Header missing | `enabled` not `true`, or current host not in `hosts` |
 | Vite bundle blocked | Add the `nonce` callable to the `lukaskleinschmidt.laravel-vite` config (step 3a) |
 | Cookie banner script blocked | Override the plugin's `cookieconsentJs` snippet in `site/snippets/` with nonced `js()` calls (step 3b) |
 | Map renders blank, worker error in console | Add `worker-src 'self' blob:` (Mapbox GL runs in a blob worker) |
 | Consent-gated tags blocked after accepting cookies | Ensure the cookie-consent script itself is nonced — `'strict-dynamic'` then trusts what it re-injects; the `text/plain` tags themselves need no nonce |
 
-> ⚠️ **Full-page caching caveat:** a cached page contains a stale nonce that won't match the fresh header. If the project uses Kirby's page cache on pages with nonced inline scripts, either exclude those pages from the cache or don't nonce inline scripts on cached pages (move them to external files loaded via a nonced loader).
+> ⚠️ **Full-page caching caveat:** a cached page contains a stale nonce that won't match the fresh header, and with `'strict-dynamic'` that blocks every script on cache hits. If the project uses Kirby's pages cache (any driver — file, Redis, Memcached), set `'cacheSafe' => true`: the HTML is then cached with a stable placeholder and the real nonce is injected per request, cache hits included. Requires Kirby 4+.
 
 ## License
 

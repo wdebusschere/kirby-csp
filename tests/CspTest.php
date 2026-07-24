@@ -83,6 +83,30 @@ class CspTest extends TestCase
         $this->assertFalse(Csp::isReservedPath(''));
     }
 
+    public function testPlaceholderRoundTripRestoresOriginalHtml(): void
+    {
+        $html = '<script nonce="abc123==">init()</script><script src="/app.js" nonce="abc123=="></script>';
+
+        $cached = Csp::insertPlaceholder($html, 'abc123==');
+
+        // The cached HTML must not contain the original nonce anywhere.
+        $this->assertStringNotContainsString('abc123==', $cached);
+        $this->assertStringContainsString(Csp::NONCE_PLACEHOLDER, $cached);
+
+        // Re-inserting the same nonce restores the original HTML exactly.
+        $this->assertSame($html, Csp::replacePlaceholder($cached, 'abc123=='));
+    }
+
+    public function testReplacePlaceholderInjectsAFreshNonceOnCacheHits(): void
+    {
+        $cached = '<script nonce="' . Csp::NONCE_PLACEHOLDER . '">init()</script>';
+
+        $this->assertSame(
+            '<script nonce="fresh==">init()</script>',
+            Csp::replacePlaceholder($cached, 'fresh==')
+        );
+    }
+
     public function testNormalizeHostLowercasesAndStripsPort(): void
     {
         $this->assertSame('example.com', Csp::normalizeHost('Example.com:8080'));

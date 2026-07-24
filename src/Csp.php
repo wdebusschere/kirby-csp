@@ -11,6 +11,30 @@ namespace Akibeo\Csp;
 class Csp
 {
     /**
+     * Stable stand-in for the per-request nonce inside cached HTML. In
+     * cacheSafe mode the rendered HTML is cached with this placeholder and
+     * the real nonce is swapped in on every response, cache hits included.
+     */
+    public const NONCE_PLACEHOLDER = '__akibeo_csp_nonce__';
+
+    /**
+     * Replace every occurrence of the request's real nonce with the stable
+     * placeholder, so the HTML can be cached without a baked-in nonce.
+     */
+    public static function insertPlaceholder(string $html, string $nonce): string
+    {
+        return str_replace($nonce, self::NONCE_PLACEHOLDER, $html);
+    }
+
+    /**
+     * Replace every placeholder with the current request's real nonce.
+     */
+    public static function replacePlaceholder(string $html, string $nonce): string
+    {
+        return str_replace(self::NONCE_PLACEHOLDER, $nonce, $html);
+    }
+
+    /**
      * Reserved path prefixes that never receive a CSP header. The Panel ships
      * its own inline scripts that a strict nonce policy would block, and
      * API/media responses don't need a CSP.
