@@ -91,7 +91,9 @@ Kirby::plugin('akibeo/csp', [
                 ? 'Content-Security-Policy-Report-Only'
                 : 'Content-Security-Policy';
 
-            header($name . ': ' . $header);
+            // route:before can fire more than once per request (route
+            // fallthrough); replace: true keeps the header single even then.
+            header($name . ': ' . $header, true);
         },
     ],
 ]);
