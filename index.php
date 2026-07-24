@@ -61,6 +61,15 @@ Kirby::plugin('akibeo/csp', [
         // keep using cspNonce() as usual.
         'cacheSafe' => false,
 
+        // The placeholder used by cacheSafe. The default is public (it's in
+        // this open-source repo), so on sites that render user-supplied HTML
+        // an attacker who can inject markup into cached content could write
+        // the placeholder themselves and receive a valid nonce. Set a random
+        // per-site secret to close that gap, e.g. a long hex string. It must
+        // stay stable for as long as cached pages exist — changing it
+        // requires flushing the pages cache.
+        'cacheSafePlaceholder' => null,
+
         // A deliberately minimal, vendor-neutral strict baseline: everything
         // is 'self' plus the nonce mechanism. Add third-party origins
         // (Google Fonts, Analytics, Maps, Mapbox, embeds, …) per project by
@@ -123,8 +132,9 @@ Kirby::plugin('akibeo/csp', [
 
                 if ($buffering === false) {
                     $buffering = true;
+                    $placeholder = $kirby->option('akibeo.csp.cacheSafePlaceholder');
                     ob_start(
-                        fn (string $buffer) => Csp::replacePlaceholder($buffer, cspNonce())
+                        fn (string $buffer) => Csp::replacePlaceholder($buffer, cspNonce(), $placeholder)
                     );
                 }
             }
@@ -151,7 +161,11 @@ Kirby::plugin('akibeo/csp', [
                 return $html;
             }
 
-            return Csp::insertPlaceholder($html, cspNonce());
+            return Csp::insertPlaceholder(
+                $html,
+                cspNonce(),
+                $kirby->option('akibeo.csp.cacheSafePlaceholder')
+            );
         },
     ],
 ]);

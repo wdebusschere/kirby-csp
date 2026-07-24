@@ -14,6 +14,13 @@ class Csp
      * Stable stand-in for the per-request nonce inside cached HTML. In
      * cacheSafe mode the rendered HTML is cached with this placeholder and
      * the real nonce is swapped in on every response, cache hits included.
+     *
+     * The placeholder never appears in a response — only inside the cache —
+     * but this default value is public knowledge (it's in this open-source
+     * file). Anyone who can inject HTML into cached content could include it
+     * and receive a valid nonce after the swap. Sites that render
+     * user-supplied HTML should set a per-site secret via the
+     * `cacheSafePlaceholder` option instead.
      */
     public const NONCE_PLACEHOLDER = '__akibeo_csp_nonce__';
 
@@ -21,17 +28,17 @@ class Csp
      * Replace every occurrence of the request's real nonce with the stable
      * placeholder, so the HTML can be cached without a baked-in nonce.
      */
-    public static function insertPlaceholder(string $html, string $nonce): string
+    public static function insertPlaceholder(string $html, string $nonce, ?string $placeholder = null): string
     {
-        return str_replace($nonce, self::NONCE_PLACEHOLDER, $html);
+        return str_replace($nonce, $placeholder ?? self::NONCE_PLACEHOLDER, $html);
     }
 
     /**
      * Replace every placeholder with the current request's real nonce.
      */
-    public static function replacePlaceholder(string $html, string $nonce): string
+    public static function replacePlaceholder(string $html, string $nonce, ?string $placeholder = null): string
     {
-        return str_replace(self::NONCE_PLACEHOLDER, $nonce, $html);
+        return str_replace($placeholder ?? self::NONCE_PLACEHOLDER, $nonce, $html);
     }
 
     /**

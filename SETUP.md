@@ -161,6 +161,8 @@ When the console stays clean across the site, flip `reportOnly` to `false` (or r
 | Consent-gated tags blocked after accepting cookies | Ensure the cookie-consent script itself is nonced — `'strict-dynamic'` then trusts what it re-injects; the `text/plain` tags themselves need no nonce |
 
 > ⚠️ **Full-page caching caveat:** a cached page contains a stale nonce that won't match the fresh header, and with `'strict-dynamic'` that blocks every script on cache hits. If the project uses Kirby's pages cache (any driver — file, Redis, Memcached), set `'cacheSafe' => true`: the HTML is then cached with a stable placeholder and the real nonce is injected per request, cache hits included. Requires Kirby 4+.
+>
+> **Security note:** the default placeholder is a public constant, so if untrusted user-supplied HTML can reach cached pages, injected markup carrying the placeholder would receive a valid nonce after the swap. On sites that render untrusted HTML, set `'cacheSafePlaceholder'` to a random per-site secret (e.g. `bin2hex(random_bytes(16))`, generated once) and keep it stable — changing it requires flushing the pages cache. Sanitize untrusted HTML regardless; CSP is defense in depth, not a substitute.
 
 ## License
 

@@ -12,6 +12,9 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   stable nonce placeholder (via `page.render:after`) and the real per-request
   nonce is injected into every response — cache hits included — through an
   output buffer. Requires Kirby 4+.
+- `cacheSafePlaceholder` option: a per-site secret placeholder for `cacheSafe`,
+  so markup injected into cached content that carries the (public) default
+  placeholder cannot obtain a valid nonce.
 
 ### Fixed
 
