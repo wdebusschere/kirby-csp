@@ -1,10 +1,10 @@
 {
-    "name": "wdebusschere/kirby-csp",
+    "name": "akibeo/kirby-csp",
     "description": "Content-Security-Policy headers with per-request nonce for Kirby, following Google's strict CSP guidance.",
     "type": "kirby-plugin",
     "license": "MIT",
     "keywords": ["kirby", "kirby-plugin", "csp", "content-security-policy", "security", "nonce", "strict-dynamic"],
-    "homepage": "https://github.com/wdebusschere/kirby-csp",
+    "homepage": "https://github.com/akibeo/kirby-csp",
     "authors": [
         {
             "name": "Wannes Debusschere",
@@ -18,8 +18,8 @@
         }
     ],
     "support": {
-        "issues": "https://github.com/wdebusschere/kirby-csp/issues",
-        "source": "https://github.com/wdebusschere/kirby-csp"
+        "issues": "https://github.com/akibeo/kirby-csp/issues",
+        "source": "https://github.com/akibeo/kirby-csp"
     },
     "require": {
         "php": ">=8.1",
