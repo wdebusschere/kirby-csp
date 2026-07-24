@@ -59,7 +59,13 @@ Kirby::plugin('akibeo/csp', [
             }
 
             // Frontend only — skip the Panel, API and media routes.
-            if (Csp::isReservedPath($kirby->path(), $kirby->option('panel.slug', 'panel'))) {
+            $reserved = Csp::isReservedPath(
+                $kirby->path(),
+                $kirby->option('panel.slug', 'panel'),
+                $kirby->option('api.slug', 'api')
+            );
+
+            if ($reserved) {
                 return;
             }
 

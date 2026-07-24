@@ -17,10 +17,11 @@ class Csp
      *
      * @param string $path      The current Kirby request path, e.g. "aanbod/te-koop".
      * @param string $panelSlug The configured panel slug (panel.slug option).
+     * @param string $apiSlug   The configured API slug (api.slug option).
      */
-    public static function isReservedPath(string $path, string $panelSlug = 'panel'): bool
+    public static function isReservedPath(string $path, string $panelSlug = 'panel', string $apiSlug = 'api'): bool
     {
-        foreach ([$panelSlug, 'api', 'media'] as $reserved) {
+        foreach ([$panelSlug, $apiSlug, 'media'] as $reserved) {
             if ($path === $reserved || str_starts_with($path, $reserved . '/')) {
                 return true;
             }
@@ -53,7 +54,9 @@ class Csp
 
         foreach ($directives as $directive => $value) {
             $value = str_replace('{nonce}', $nonce, (string) $value);
-            $policy[] = trim($directive . ' ' . $value) . ';';
+            // A CR/LF in a header value makes PHP's header() drop the header
+            // silently — fold stray newlines into spaces instead.
+            $policy[] = trim(preg_replace('/\s+/', ' ', $directive . ' ' . $value)) . ';';
         }
 
         if ($policy === []) {

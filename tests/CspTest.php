@@ -46,6 +46,14 @@ class CspTest extends TestCase
         $this->assertNull(Csp::compile([], 'n'));
     }
 
+    public function testCompileFoldsNewlinesIntoSpaces(): void
+    {
+        // A CR/LF would make PHP's header() drop the header silently.
+        $header = Csp::compile(['script-src' => "'self'\r\nhttps://example.com"], 'n');
+
+        $this->assertSame("script-src 'self' https://example.com;", $header);
+    }
+
     public function testIsReservedPathMatchesPanelApiAndMedia(): void
     {
         $this->assertTrue(Csp::isReservedPath('panel'));
@@ -59,6 +67,13 @@ class CspTest extends TestCase
         $this->assertTrue(Csp::isReservedPath('cp/pages', 'cp'));
         // The default panel slug no longer matches when a custom one is set.
         $this->assertFalse(Csp::isReservedPath('panel/pages', 'cp'));
+    }
+
+    public function testIsReservedPathHonoursCustomApiSlug(): void
+    {
+        $this->assertTrue(Csp::isReservedPath('v1/properties', 'panel', 'v1'));
+        // The default API slug no longer matches when a custom one is set.
+        $this->assertFalse(Csp::isReservedPath('api/properties', 'panel', 'v1'));
     }
 
     public function testIsReservedPathDoesNotMatchOnPrefixAlone(): void
