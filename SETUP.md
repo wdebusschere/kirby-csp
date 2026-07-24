@@ -9,7 +9,7 @@ The goal: a strict, nonce-based `Content-Security-Policy` header, rolled out saf
 Composer:
 
 ```bash
-composer require wdebusschere/kirby-csp
+composer require akibeo/kirby-csp
 ```
 
 Or copy the whole folder into the target project as `site/plugins/kirby-csp/`:

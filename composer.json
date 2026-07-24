@@ -1,5 +1,5 @@
 {
-    "name": "wdebusschere/kirby-csp",
+    "name": "akibeo/kirby-csp",
     "description": "Content-Security-Policy headers with per-request nonce for Kirby, following Google's strict CSP guidance.",
     "type": "kirby-plugin",
     "license": "MIT",

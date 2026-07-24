@@ -14,7 +14,7 @@ Sends a strict `Content-Security-Policy` header with a per-request nonce for [Ki
 ### Composer
 
 ```bash
-composer require wdebusschere/kirby-csp
+composer require akibeo/kirby-csp
 ```
 
 ### Download / Git submodule
