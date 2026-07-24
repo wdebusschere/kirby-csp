@@ -1,0 +1,9 @@
+/vendor/
+composer.lock
+.phpunit.result.cache
+.phpunit.cache/
+.DS_Store
+*.sublime-*
+
+# Reference plugin kept locally as a structural example, not part of this repo.
+/kirby-uniform/
