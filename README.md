@@ -1,6 +1,6 @@
 # Kirby CSP
 
-[![Tests](https://github.com/wdebusschere/kirby-csp/actions/workflows/php.yml/badge.svg)](https://github.com/wdebusschere/kirby-csp/actions/workflows/php.yml) ![Kirby 4/5](https://img.shields.io/badge/Kirby-4%20%7C%205-green.svg) ![License MIT](https://img.shields.io/badge/license-MIT-blue.svg)
+[![Tests](https://github.com/akibeo/kirby-csp/actions/workflows/php.yml/badge.svg)](https://github.com/akibeo/kirby-csp/actions/workflows/php.yml) ![Kirby 4/5](https://img.shields.io/badge/Kirby-4%20%7C%205-green.svg) ![License MIT](https://img.shields.io/badge/license-MIT-blue.svg)
 
 Sends a strict `Content-Security-Policy` header with a per-request nonce for [Kirby](https://getkirby.com), following [Google's strict CSP guidance](https://web.dev/articles/strict-csp) — `'strict-dynamic'` + nonce, with `https:` / `'unsafe-inline'` kept only as a legacy-browser fallback.
 
@@ -14,7 +14,7 @@ Sends a strict `Content-Security-Policy` header with a per-request nonce for [Ki
 ### Composer
 
 ```bash
-composer require wdebusschere/kirby-csp
+composer require akibeo/kirby-csp
 ```
 
 ### Download / Git submodule
@@ -22,7 +22,7 @@ composer require wdebusschere/kirby-csp
 Copy this repository into `site/plugins/kirby-csp/`:
 
 ```bash
-git submodule add https://github.com/wdebusschere/kirby-csp.git site/plugins/kirby-csp
+git submodule add https://github.com/akibeo/kirby-csp.git site/plugins/kirby-csp
 ```
 
 No build step is required — Kirby autoloads plugins from `site/plugins/`. The plugin registers itself as `akibeo/csp` and reads its options from the `akibeo.csp` namespace.

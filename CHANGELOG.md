@@ -39,4 +39,4 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `{nonce}` placeholder.
 - Panel, API and media routes are never sent a CSP header.
 
-[1.0.0]: https://github.com/wdebusschere/kirby-csp/releases/tag/1.0.0
+[1.0.0]: https://github.com/akibeo/kirby-csp/releases/tag/1.0.0
