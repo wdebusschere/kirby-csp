@@ -47,15 +47,23 @@ Before enabling anything, find what the policy must allow.
 grep -rn "<script" site/templates site/snippets | grep -v "cspNonce()"
 ```
 
-**b) Third-party origins** used by the frontend (candidates for the directive whitelist):
+**b) Inline event handlers**, which a nonce cannot rescue — these must be rewritten before enabling (see §3):
+
+```bash
+grep -rnoEi '(^|[[:space:]])on[a-z]+="[^"]*"|href="javascript:[^"]*"' site/templates site/snippets
+```
+
+This assumes double-quoted attributes; if the codebase also uses `onclick='…'`, run it again with the quotes swapped.
+
+**c) Third-party origins** used by the frontend (candidates for the directive whitelist):
 
 ```bash
 grep -rhoE 'https://[a-z0-9.-]+' site/templates site/snippets assets | sort -u
 ```
 
-**c) Or use an AI agent** — example prompt:
+**d) Or use an AI agent** — example prompt:
 
-> Search all templates and snippets (site/templates, site/snippets) for `<script>` tags. For every inline script and every static `<script src>` tag without a `nonce` attribute, add `nonce="{{ cspNonce() }}"` (Blade) or `nonce="<?= cspNonce() ?>"` (plain PHP templates). Then list every third-party domain the frontend loads resources from — scripts, styles, fonts, images, iframes, and fetch/XHR endpoints (check assets/js too) — grouped by CSP directive (script-src, style-src, font-src, img-src, frame-src, connect-src), so I can whitelist them in the `akibeo.csp` directives config.
+> Search all templates and snippets (site/templates, site/snippets) for `<script>` tags. For every inline script and every static `<script src>` tag without a `nonce` attribute, add `nonce="{{ cspNonce() }}"` (Blade) or `nonce="<?= cspNonce() ?>"` (plain PHP templates). Separately, find every inline event handler attribute (`onclick`, `onchange`, `onsubmit`, … any `on*=`) and every `href="javascript:…"`, and report them — these cannot take a nonce and must be rewritten as `addEventListener` calls in a bundled JS file. Then list every third-party domain the frontend loads resources from — scripts, styles, fonts, images, iframes, and fetch/XHR endpoints (check assets/js too) — grouped by CSP directive (script-src, style-src, font-src, img-src, frame-src, connect-src), so I can whitelist them in the `akibeo.csp` directives config.
 
 Typical origins to look for: Google Fonts, Google Analytics / Tag Manager, Google Maps or Mapbox, YouTube/Vimeo embeds, cookie-consent CDNs, chat widgets, form/recaptcha endpoints.
 
@@ -83,6 +91,23 @@ Notes:
 - Scripts **injected by a nonced script** (e.g. GTM loading further scripts, Mapbox GL lazy-loading) are allowed automatically by `'strict-dynamic'` — no nonce needed there.
 - **Consent-gated scripts stay un-nonced**: `<script type="text/plain" data-category="...">` tags (gtag, Meta pixel, LinkedIn Insight) are inert until the cookie-consent script re-injects them via `createElement` — `'strict-dynamic'` trusts that injection because the consent script itself is nonced.
 - `<script type="application/ld+json">` data blocks are never executed and need no nonce.
+- **Inline event handlers cannot be nonced — rewrite them.** A nonce is an attribute on a `<script>` tag; there is nowhere to put one on `onclick="…"`. The `'unsafe-inline'` in the default `script-src` does not help either: the browser ignores it as soon as a nonce is present in the same directive (that's the "Note that 'unsafe-inline' is ignored…" sentence in the console error). So every `on*=` attribute and every `href="javascript:…"` fails with *"Executing inline event handler violates the following Content Security Policy directive"*. Replace them with a data attribute plus a listener in a bundled script:
+
+  ```blade
+  {{-- before --}}
+  <button onclick="toggleTheme()">…</button>
+
+  {{-- after --}}
+  <button type="button" data-theme-toggle>…</button>
+  ```
+
+  ```js
+  document.addEventListener('click', (event) => {
+      if (event.target.closest('[data-theme-toggle]')) toggleTheme();
+  });
+  ```
+
+  Use `closest()` rather than comparing `event.target` directly, so clicks landing on a child element (an icon inside the button) still match. Allowing these via `'unsafe-hashes'` plus a hash per handler is possible but not recommended — it defeats most of the benefit of a strict policy and every handler edit becomes a config change.
 - The Panel is untouched: the header is only sent on frontend routes, and only when enabled.
 
 **a) Vite tags** — the tags printed by `vite()` are parser-inserted and need the nonce too. `lukaskleinschmidt/kirby-laravel-vite` supports a nonce option that accepts a callable, resolved once per request:
