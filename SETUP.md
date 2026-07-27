@@ -50,8 +50,10 @@ grep -rn "<script" site/templates site/snippets | grep -v "cspNonce()"
 **b) Inline event handlers**, which a nonce cannot rescue — these must be rewritten before enabling (see §3):
 
 ```bash
-grep -rnoE ' on[a-z]+="[^"]*|href="javascript:[^"]*' site/templates site/snippets
+grep -rnoEi '(^|[[:space:]])on[a-z]+="[^"]*"|href="javascript:[^"]*"' site/templates site/snippets
 ```
+
+This assumes double-quoted attributes; if the codebase also uses `onclick='…'`, run it again with the quotes swapped.
 
 **c) Third-party origins** used by the frontend (candidates for the directive whitelist):
 

@@ -141,7 +141,7 @@ Before enforcing, every inline `<script>` and static `<script src>` in the templ
 grep -rn "<script" site/templates site/snippets | grep -v "cspNonce()"
 
 # Inline event handlers — these can't be nonced, they must be rewritten
-grep -rnoE ' on[a-z]+="[^"]*|href="javascript:[^"]*' site/templates site/snippets
+grep -rnoEi '(^|[[:space:]])on[a-z]+="[^"]*"|href="javascript:[^"]*"' site/templates site/snippets
 
 # Third-party origins referenced anywhere in the frontend
 grep -rhoE 'https://[a-z0-9.-]+' site/templates site/snippets assets | sort -u
