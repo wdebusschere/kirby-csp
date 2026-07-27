@@ -66,7 +66,7 @@ Typical origins to look for: Google Fonts, Google Analytics / Tag Manager, Googl
 | Mapbox GL JS | `style-src https://api.mapbox.com` (lazy-loaded css), `connect-src https://api.mapbox.com https://events.mapbox.com`, `worker-src 'self' blob:` (layout engine runs in a blob worker), `blob:` in `img-src` |
 | Fontshare (Satoshi) | `style-src https://api.fontshare.com`, `font-src https://cdn.fontshare.com https://api.fontshare.com` |
 | GTM noscript pixel | `frame-src https://www.googletagmanager.com` |
-| reCAPTCHA v3 | covered by defaults (`frame-src https://www.google.com`); the loader tag itself needs a nonce |
+| reCAPTCHA v3 | `frame-src https://www.google.com`, `connect-src https://www.google.com https://www.gstatic.com` (it XHRs to `/recaptcha/api2/*` on every submission); the loader tag itself needs a nonce |
 
 ## 3. Add the nonce to script tags
 
