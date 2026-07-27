@@ -101,6 +101,23 @@ The nonce is generated once per request and memoized, so every call returns the 
 
 External scripts loaded by a nonced script are allowed automatically via `'strict-dynamic'`; static `<script src>` tags need the nonce attribute too. Consent-gated `<script type="text/plain">` tags and `application/ld+json` data blocks need no nonce — the former are re-injected by the (nonced) cookie-consent script, the latter are never executed.
 
+### Inline event handlers must be rewritten
+
+A nonce lives on a `<script>` tag, so there is nothing to attach one to on `onclick="…"`. The `'unsafe-inline'` fallback in the default `script-src` does not cover them either — browsers ignore it once a nonce is present in the same directive. Every `on*=` attribute and `href="javascript:…"` therefore fails with *"Executing inline event handler violates the following Content Security Policy directive"*. Move the behaviour into a bundled script:
+
+```blade
+<button onclick="toggleTheme()">…</button>          {{-- blocked --}}
+<button type="button" data-theme-toggle>…</button>  {{-- ok --}}
+```
+
+```js
+document.addEventListener('click', (event) => {
+    if (event.target.closest('[data-theme-toggle]')) toggleTheme();
+});
+```
+
+`'unsafe-hashes'` plus a per-handler hash would also work, but it weakens the policy and turns every handler edit into a config change. See [SETUP.md](SETUP.md) for details.
+
 ### Nonce for Vite tags
 
 The tags printed by `vite()` are parser-inserted and need the nonce as well. The [`lukaskleinschmidt/kirby-laravel-vite`](https://github.com/lukaskleinschmidt/kirby-laravel-vite) plugin accepts a callable, resolved once per request:
@@ -122,6 +139,9 @@ Before enforcing, every inline `<script>` and static `<script src>` in the templ
 ```bash
 # Inline and static script tags (excluding already-nonced ones)
 grep -rn "<script" site/templates site/snippets | grep -v "cspNonce()"
+
+# Inline event handlers — these can't be nonced, they must be rewritten
+grep -rnoE ' on[a-z]+="[^"]*|href="javascript:[^"]*' site/templates site/snippets
 
 # Third-party origins referenced anywhere in the frontend
 grep -rhoE 'https://[a-z0-9.-]+' site/templates site/snippets assets | sort -u
